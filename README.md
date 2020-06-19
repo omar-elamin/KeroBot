@@ -1,0 +1,2 @@
+# KeroBot
+TeamKero Discord Bot
