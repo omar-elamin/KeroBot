@@ -1,2 +1,2 @@
 # KeroBot
-TeamKero Discord Bot
+Kero Discord Bot
