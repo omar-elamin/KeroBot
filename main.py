@@ -10,6 +10,7 @@ import youtube_dl
 import time
 import ast
 
+
 load_dotenv()
 botToken = os.getenv('botToken')
 
@@ -56,12 +57,30 @@ async def listdevs(ctx):
     for x in devs:
         dev = bot.get_user(x)
         await ctx.send(f'- {dev}')
+           
+#@bot.command(name = commandNames[0])    
+#async def francisco(msg):
+#    await msg.send(textResponses[0])
 
 @bot.command(pass_context=True)
 async def dm(ctx, user: discord.Member,*, msg):
     if (commands.check(is_dev) or user == ctx.author):
         await user.send(msg)
         print(f'sent DM to {user.name}: {msg}')
+    
+#@bot.command(name = commandNames[2], help='')
+#@commands.check(is_dev)
+#async def debug(ctx, command, args1: discord.Member, *,args2: discord.Role):
+#    if command == 'addrole':
+#        guild = discord.Message.guild.name
+ #       await args1.add_roles(args2)
+  #      await ctx.send(f'Missing permission: manage_roles=True')
+   #     print(f"Added: {args2} to: {args1.name} in: {ctx.guild.name} (debug)")
+    #elif command == 'delrole':
+     #   guild = discord.Message.guild.name
+      #  await args1.remove_roles(args2)
+       # await ctx.send(f'Missing permission: manage_roles=True')
+        #print(f"Removed: {args2} from: {args1.name} in: {ctx.guild.name} (debug)")
 
 @bot.command(name = commandNames[3], help ='Adds a role to a specified user. Usage: ,addrole [user] [role]')
 @commands.has_permissions(manage_roles=True)
@@ -146,6 +165,8 @@ async def unblacklist(ctx,*, name):
         
     except ValueError:
         ctx.send(f'{name} is not currently blacklisted.')
+
+    
         
 @bot.command(pass_context=True)
 @commands.check(is_dev)
@@ -215,9 +236,9 @@ async def uptime(ctx):
     await ctx.send(f'Uptime: **{days}** days, **{hours}** hours, **{minutes}** minutes, and **{seconds}** seconds.')
 
 @bot.command(pass_context=True)
+@commands.has_permissions(manage_nicknames=True)
 async def nick(ctx, user: discord.Member,*, nick):
-    if (commands.has_permissions(manage_nicknames=True) or ctx.author.name == elmon):
-        await user.edit(nick=nick)
+    await user.edit(nick=nick)
 
 @bot.event
 async def on_member_update(before, after):
@@ -287,8 +308,9 @@ async def userinfo(ctx, *, user: discord.Member):
 `On a Phone?` {user.is_on_mobile()}'''
     await ctx.send(messagetoSend)
 
-# eval command is stolen code lol
+
 @bot.command(name='eval')
+@commands.check(is_dev)
 async def debug(ctx, *, cmd):
     """Evaluates input.
     Input is interpreted as newline seperated statements.
