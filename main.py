@@ -184,7 +184,7 @@ async def say(ctx, *, msg):
 
 @bot.command(pass_context=True)
 async def ping(ctx):
-    await ctx.send(f'Latency: {round(bot.latency, 2)}ms')
+    await ctx.send(f'Latency: {round(bot.latency/1000, 2)}ms')
 
 
 @bot.command(pass_context=True)
