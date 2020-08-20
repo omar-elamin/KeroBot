@@ -137,12 +137,9 @@ async def shutdown(ctx):
 
 @bot.command(name=commandNames[8], help='Get the link to anyones profile photo!')
 async def avatarFinder(ctx, user: discord.Member):
-    if ctx.author.name in blackList:
-        await ctx.send('It appears you are blacklisted.')
-    else:
-        avatarurl = str(user.avatar_url)
-        await ctx.send(f'{avatarurl}')
-        print(f"Gave {user}'s avatar to {ctx.author.name}")
+    avatarurl = str(user.avatar_url)
+    await ctx.send(f'{avatarurl}')
+    print(f"Gave {user}'s avatar to {ctx.author.name}")
 
 
 @bot.command(pass_context=True)
@@ -169,7 +166,7 @@ async def unblacklist(ctx, *, name):
 @commands.check(is_dev)
 async def showblacklist(ctx):
     if not blackList:
-        await ctx.send('No players currently blacklisted.')
+        await ctx.send('No users currently blacklisted.')
     else:
         print(f'Showing {ctx.author.name} the blacklist.')
         await ctx.send('Current blacklist:')
@@ -179,12 +176,9 @@ async def showblacklist(ctx):
 
 @bot.command(pass_context=True)
 async def say(ctx, *, msg):
-    if ctx.author.name in blackList:
-        return await bot.say('Error: It appears you are blacklisted.')
-    else:
-        cmdMsg = ctx.message
-        await cmdMsg.delete()
-        await ctx.send(f'{msg}')
+    cmdmsg = ctx.message
+    await cmdmsg.delete()
+    await ctx.send(f'{msg}')
 
 
 @bot.command(pass_context=True)
