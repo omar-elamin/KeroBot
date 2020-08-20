@@ -110,10 +110,13 @@ textResponses = ['gay']
 
 @bot.command(pass_context=True)
 async def listdevs(ctx):
-    await ctx.send("Current devs:")
+    print(f'Showing {ctx.author.name} the Dev list.')
+    devlistMessage = ''
     for x in devs:
         dev = bot.get_user(x)
-        await ctx.send(f'- {dev}')
+        devlistMessage += f'- {dev}\n'
+    devlistEmbed = discord.Embed(description=devlistMessage, title='Developers:')
+    await ctx.send(embed=devlistEmbed)
 
 
 # @bot.command(name = commandNames[0])
