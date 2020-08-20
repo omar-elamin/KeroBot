@@ -170,10 +170,11 @@ async def showblacklist(ctx):
         await ctx.send('No users currently blacklisted.')
     else:
         print(f'Showing {ctx.author.name} the blacklist.')
-        await ctx.send('Current blacklist:')
+        blackListMessage = ''
         for x in blackList:
-            await ctx.send(f' - {x}')
-
+            blackListMessage += f'- {x}\n'
+        blackListEmbed = discord.Embed(description=blackListMessage, title='Current blacklist')
+        await ctx.send(embed=blackListEmbed)
 
 @bot.command(pass_context=True)
 async def say(ctx, *, msg):
@@ -184,7 +185,7 @@ async def say(ctx, *, msg):
 
 @bot.command(pass_context=True)
 async def ping(ctx):
-    await ctx.send(f'Latency: {round(bot.latency/1000, 2)}ms')
+    await ctx.send(f'Latency: {round(bot.latency*1000, 2)}ms')
 
 
 @bot.command(pass_context=True)
