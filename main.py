@@ -68,20 +68,6 @@ async def dm(ctx, user: discord.Member,*, msg):
         await user.send(msg)
         print(f'sent DM to {user.name}: {msg}')
     
-#@bot.command(name = commandNames[2], help='')
-#@commands.check(is_dev)
-#async def debug(ctx, command, args1: discord.Member, *,args2: discord.Role):
-#    if command == 'addrole':
-#        guild = discord.Message.guild.name
- #       await args1.add_roles(args2)
-  #      await ctx.send(f'Missing permission: manage_roles=True')
-   #     print(f"Added: {args2} to: {args1.name} in: {ctx.guild.name} (debug)")
-    #elif command == 'delrole':
-     #   guild = discord.Message.guild.name
-      #  await args1.remove_roles(args2)
-       # await ctx.send(f'Missing permission: manage_roles=True')
-        #print(f"Removed: {args2} from: {args1.name} in: {ctx.guild.name} (debug)")
-
 @bot.command(name = commandNames[3], help ='Adds a role to a specified user. Usage: ,addrole [user] [role]')
 @commands.has_permissions(manage_roles=True)
 async def addRole(ctx, user: discord.Member,*, role: discord.Role):
