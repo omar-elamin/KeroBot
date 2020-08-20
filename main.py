@@ -48,8 +48,8 @@ async def on_ready():
     ''')
     game = discord.Game('with your feelings')
     await bot.change_presence(status=discord.Status.online, activity=game)
-
-    print('Bot currently in {guildCount} guilds.')
+    guildCount = len(bot.guilds)
+    print(f'Bot currently in {guildCount} guilds.')
     for guild in bot.guilds:
         print(f'Connected to guild: {guild.name}, Owner: {guild.owner}')
         guildsN.append(guild.name)
