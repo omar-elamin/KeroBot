@@ -104,7 +104,6 @@ async def on_command_error(ctx, error):
     await ctx.send("Error while running command: `{}`".format(error))
 
 
-commandNames = ['francisco', '-', 'debug', 'addrole', 'shutdown', 'delrole', 'kick', 'ban', 'avatar', 'music']
 textResponses = ['gay']
 
 
@@ -119,7 +118,7 @@ async def listdevs(ctx):
     await ctx.send(embed=devlistEmbed)
 
 
-# @bot.command(name = commandNames[0])
+# @bot.command()
 # async def francisco(msg):
 #    await msg.send(textResponses[0])
 
@@ -144,11 +143,11 @@ async def shutdown(ctx):
     await bot.logout()
 
 
-@bot.command(name=commandNames[8], help='Get the link to anyones profile photo!')
-async def avatarFinder(ctx, user: discord.Member):
-    avatarurl = str(user.avatar_url)
+@bot.command(help='Get the link to anyones profile photo!')
+async def avatar(ctx, member: discord.Member):
+    avatarurl = str(member.avatar_url)
     await ctx.send(f'{avatarurl}')
-    print(f"Gave {user}'s avatar to {ctx.author.name}")
+    print(f"Gave {member}'s avatar to {ctx.author.name}")
 
 
 @bot.command(pass_context=True)
@@ -205,12 +204,6 @@ async def uptime(ctx):
     minutes, seconds = divmod(remainder, 60)
     days, hours = divmod(hours, 24)
     await ctx.send(f'Uptime: **{days}** days, **{hours}** hours, **{minutes}** minutes, and **{seconds}** seconds.')
-
-
-@bot.command(pass_context=True)
-@commands.has_permissions(manage_nicknames=True)
-async def nick(ctx, user: discord.Member, *, nick):
-    await user.edit(nick=nick)
 
 
 @bot.command(pass_context=True)

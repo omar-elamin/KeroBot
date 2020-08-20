@@ -38,15 +38,14 @@ class Moderation(commands.Cog):
         await user.ban(reason=f'{reason} || by: {ctx.author.name}', delete_message_days=0)
         await ctx.send(f'`{user.name} has been banned by: {ctx.author.name} for reason: {reason}`')
         print(f"Banned {user.name} from {ctx.guild.name}")
-    
+
     @commands.command()
     @commands.has_permissions(ban_members=True)
-    async def unban(self, ctx, user : discord.User, *, reason=None):
-        guild = discord.Message.guild.name
+    async def unban(self, ctx, user: discord.User, *, reason=None):
         await ctx.guild.unban(user, reason=f'{reason} || by: {ctx.author.name}')
         await ctx.send(f'`{user.name} has been unbanned by: {ctx.author.name} for reason: {reason}`')
         print(f"Banned {user.name} from {ctx.guild.name}")
-    
+
     @commands.command()
     @commands.has_permissions(manage_messages=True)
     async def purge(self, ctx, msgs):
@@ -77,6 +76,12 @@ class Moderation(commands.Cog):
         await member.remove_roles(mutedrole)
         await ctx.send(f'`{member} unmuted by {ctx.author.name}`')
         print(f'Unmuted {member} in {ctx.guild.name}')
+
+    @commands.command()
+    @commands.has_permissions(manage_nicknames=True)
+    async def nick(self, ctx, user: discord.Member, *, nick):
+        await user.edit(nick=nick)
+        await ctx.send(f'Changed {user}\'s nickname to {nick}')
 
 
 def setup(bot):
