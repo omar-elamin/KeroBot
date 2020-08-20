@@ -11,7 +11,7 @@ load_dotenv()
 botToken = os.getenv('botToken')
 
 currentGuild = os.getenv('guildName')
-bot = commands.Bot(command_prefix=os.getenv('prefix'), description='description')
+bot = commands.Bot(command_prefix=os.getenv('prefix'), description='Kero Help Command')
 devs = [114348811995840515, 365274392680333329, 372078453236957185, 147765181903011840]
 blacklistFile = open(r"blacklist.txt", "r+")
 blackList = []
