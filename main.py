@@ -99,6 +99,11 @@ async def on_message(message):
     await bot.process_commands(message)
 
 
+@bot.event
+async def on_command_error(ctx, error):
+    await ctx.send("Error while running command: `{}`".format(error))
+
+
 commandNames = ['francisco', '-', 'debug', 'addrole', 'shutdown', 'delrole', 'kick', 'ban', 'avatar', 'music']
 textResponses = ['gay']
 
@@ -176,6 +181,7 @@ async def showblacklist(ctx):
         blackListEmbed = discord.Embed(description=blackListMessage, title='Current blacklist')
         await ctx.send(embed=blackListEmbed)
 
+
 @bot.command(pass_context=True)
 async def say(ctx, *, msg):
     cmdmsg = ctx.message
@@ -185,7 +191,7 @@ async def say(ctx, *, msg):
 
 @bot.command(pass_context=True)
 async def ping(ctx):
-    await ctx.send(f'Latency: {round(bot.latency*1000, 2)}ms')
+    await ctx.send(f'Latency: {round(bot.latency * 1000, 2)}ms')
 
 
 @bot.command(pass_context=True)
