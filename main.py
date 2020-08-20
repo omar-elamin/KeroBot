@@ -1,15 +1,11 @@
-import os
-import discord
-from dotenv import load_dotenv
-import datetime
-from discord.ext import commands
-from discord import member
-from discord.utils import get
-from discord import VoiceClient
-import youtube_dl
-import time
 import ast
+import discord
+import datetime
+import os
+import time
 
+from discord.ext import commands
+from dotenv import load_dotenv
 
 load_dotenv()
 botToken = os.getenv('botToken')
@@ -19,15 +15,31 @@ bot = commands.Bot(command_prefix=os.getenv('prefix'), description='description'
 devs = [114348811995840515, 365274392680333329, 372078453236957185, 147765181903011840]
 blacklistFile = open(r"blacklist.txt", "r+")
 blackList = []
-client = discord.Client()
 guildsN = []
+franNames = ['complex', 'fran', 'francisco']
 
 for line in blacklistFile:
     blackList.append(line.strip('\n'))
 
+
 def is_dev(ctx):
-    return(ctx.message.author.id in devs)
+    return ctx.message.author.id in devs
+
+
 starttime = ''
+
+extensions = [
+    "commands.moderation"
+]
+
+if __name__ == '__main__':
+    for extension in extensions:
+        try:
+            bot.load_extension(extensions)
+            print(f"{extension}" + " loaded successfully")
+        except Exception as e:
+            print("{} didn't load {}".format(extension, e))
+
 
 @bot.event
 async def on_ready():
@@ -35,8 +47,8 @@ async def on_ready():
     print(''''\t
     ''')
     game = discord.Game('with your feelings')
-    await bot.change_presence(status=discord.Status.online, activity = game)
-    
+    await bot.change_presence(status=discord.Status.online, activity=game)
+
     print('Bot currently in {guildCount} guilds.')
     for guild in bot.guilds:
         print(f'Connected to guild: {guild.name}, Owner: {guild.owner}')
@@ -47,9 +59,48 @@ async def on_ready():
     print('\n')
     global starttime
     starttime = datetime.datetime.utcnow()
-    
+
+
+@bot.event
+async def on_member_update(before, after):
+    botschannel = bot.get_channel(740619681680982109)
+    if before.id == 607019207602864198 and after.nick != 'belle delphine':
+        bowieembed = discord.Embed(description="Changed bowie's name back to belle delphine <@653719710147411969>",
+                                   color=0x00ff00)
+        await after.edit(nick="belle delphine")
+        await botschannel.send(embed=bowieembed)
+
+
+@bot.event
+async def on_message(message):
+    if message.author.name == bot.user.name:
+        return
+    else:
+        channel = message.channel
+        #  Guild specific features
+        if channel.guild.name == 'resonance':
+            pass
+        if channel.guild.name == 'Kero':
+            for x in franNames:
+                if x in message.content.lower():
+                    await channel.send('Fran is a homosexual.')
+        if channel.guild.name == 'Radical Roller Rink':
+            if '!rank' in message.content and channel.name != 'bot-spam':
+                await channel.send('<#741113645487882381>')
+                time.sleep(1)
+                await channel.purge(limit=1)
+        await bot.process_commands(message)
+
+    if message.author.id in blackList and message.content.startswith(os.getenv('prefix')):
+        await message.channel.send("It appears you are blacklisted.")
+        print("[Blacklist] {} tried running command {}".format(message.author, message.content))
+        return
+    await bot.process_commands(message)
+
+
 commandNames = ['francisco', '-', 'debug', 'addrole', 'shutdown', 'delrole', 'kick', 'ban', 'avatar', 'music']
 textResponses = ['gay']
+
 
 @bot.command(pass_context=True)
 async def listdevs(ctx):
@@ -57,76 +108,35 @@ async def listdevs(ctx):
     for x in devs:
         dev = bot.get_user(x)
         await ctx.send(f'- {dev}')
-           
-#@bot.command(name = commandNames[0])    
-#async def francisco(msg):
+
+
+# @bot.command(name = commandNames[0])
+# async def francisco(msg):
 #    await msg.send(textResponses[0])
 
 @bot.command(pass_context=True)
-async def dm(ctx, user: discord.Member,*, msg):
-    if (commands.check(is_dev) or user == ctx.author):
+async def dm(ctx, user: discord.Member, *, msg):
+    if commands.check(is_dev) or user == ctx.author:
         await user.send(msg)
         print(f'sent DM to {user.name}: {msg}')
-    
-@bot.command(name = commandNames[3], help ='Adds a role to a specified user. Usage: ,addrole [user] [role]')
-@commands.has_permissions(manage_roles=True)
-async def addRole(ctx, user: discord.Member,*, role: discord.Role):
-    if ctx.author.name in blackList:
-        await ctx.send('It appears you are blacklisted.')
-    else:
-        guild = discord.Message.guild.name
-        await user.add_roles(role)
-        await ctx.send(f'{user.name} has been assigned the role {role.name} by: {ctx.author.name}')
-        print(f"Added: {role} to: {user.name} in: {ctx.guild.name}")
-    
-@bot.command(name=commandNames[4], help='Shuts down the bot', aliases=['kill', 'restart'])
+
+
+@bot.command(help='Shuts down the bot', aliases=['kill', 'restart'])
 @commands.check(is_dev)
 async def shutdown(ctx):
     blacklistFile.close()
     print('Updating blacklist')
     updatingFile = open(r'blacklist.txt', 'w+')
     for x in blackList:
-        updatingFile.write(x+'\n')
+        updatingFile.write(x + '\n')
     updatingFile.close()
     await ctx.send(f'{ctx.author.name} has shut down the bot.')
     print(f'{ctx.author.name}: shutting down {bot.user.name} command sent in {ctx.guild.name}')
     await bot.logout()
-    
-@bot.command(name = commandNames[5], help ='Removes a role from a specified user. Usage: ,delrole [user] [role]')
-@commands.has_permissions(manage_roles=True)
-async def delRole(ctx, user: discord.Member,*, role: discord.Role):
-    if ctx.author.name in blackList:
-        await ctx.send('It appears you are blacklisted.')
-    else:
-        guild = discord.Message.guild.name
-        await user.remove_roles(role)
-        await ctx.send(f'{user.name} has been removed from the role {role.name} by: {ctx.author.name}')
-        print(f"Removed role: {role} from: {user.name} in: {ctx.guild.name}")
 
-@bot.command(name = commandNames[6], help='Kicks a user from the guild. Usage: ,kick [user] [reason]')
-@commands.has_permissions(kick_members=True)
-async def kick(ctx, user : discord.Member, *, reason=None):
-    if ctx.author.name in blackList:
-        await ctx.send('It appears you are blacklisted.')
-    else:
-        guild = discord.Message.guild.name
-        await user.kick(reason=f'{reason} || by: {ctx.author.name}')
-        await ctx.send(f'{user.name} has been kicked by: {ctx.author.name} for reason: {reason}')
-        print(f"Kicked {user.name} from {ctx.guild.name}")
-    
-@bot.command(name=commandNames[7], help='Bans a user from the guild. Usage: ,ban [user] [reason]')
-@commands.has_permissions(ban_members=True)
-async def ban(ctx, user : discord.Member, *, reason=None):
-    if ctx.author.name in blackList:
-        await ctx.send('It appears you are blacklisted.')
-    else:
-        guild = discord.Message.guild.name
-        await user.ban(reason=f'{reason} || by: {ctx.author.name}', delete_message_days=0)
-        await ctx.send(f'{user.name} has been banned by: {ctx.author.name} for reason: {reason}')
-        print(f"Banned {user.name} from {ctx.guild.name}")
-    
+
 @bot.command(name=commandNames[8], help='Get the link to anyones profile photo!')
-async def avatarFinder(ctx, user : discord.Member):
+async def avatarFinder(ctx, user: discord.Member):
     if ctx.author.name in blackList:
         await ctx.send('It appears you are blacklisted.')
     else:
@@ -134,26 +144,27 @@ async def avatarFinder(ctx, user : discord.Member):
         await ctx.send(f'{avatarurl}')
         print(f"Gave {user}'s avatar to {ctx.author.name}")
 
+
 @bot.command(pass_context=True)
 @commands.check(is_dev)
-async def blacklist(ctx,*, name):
+async def blacklist(ctx, *, name):
     blackList.append(name)
     await ctx.send(f'{name} has been blacklisted.')
     print(f'Added {name} to the blacklist.')
 
+
 @bot.command(pass_context=True)
 @commands.check(is_dev)
-async def unblacklist(ctx,*, name):
+async def unblacklist(ctx, *, name):
     try:
         await ctx.send(f'{name} has been unblacklisted.')
         print(f'Removed {name} from the blacklist.')
         blackList.remove(name)
-        
+
     except ValueError:
         ctx.send(f'{name} is not currently blacklisted.')
 
-    
-        
+
 @bot.command(pass_context=True)
 @commands.check(is_dev)
 async def showblacklist(ctx):
@@ -165,6 +176,7 @@ async def showblacklist(ctx):
         for x in blackList:
             await ctx.send(f' - {x}')
 
+
 @bot.command(pass_context=True)
 async def say(ctx, *, msg):
     if ctx.author.name in blackList:
@@ -174,42 +186,10 @@ async def say(ctx, *, msg):
         await cmdMsg.delete()
         await ctx.send(f'{msg}')
 
-@bot.command(pass_context=True)
-async def purge(ctx, msgs):
-    channel = ctx.channel
-    if ctx.author.name in blackList:
-        await ctx.send('It appears you are blacklisted.')
-    elif (commands.has_permissions(manage_messages=True) or commands.check(is_dev)):
-        await channel.purge(limit=(int(msgs)+1))
-        await ctx.send(f'{ctx.author.name} deleted {msgs} messages')
-        print(f'{ctx.author.name} purged {msgs} messages in {ctx.guild.name}')
 
 @bot.command(pass_context=True)
 async def ping(ctx):
     await ctx.send(f'Latency: {round(bot.latency, 2)}ms')
-
-@bot.command(pass_context=True)
-@commands.has_permissions(manage_messages=True)
-async def mute(ctx, member: discord.Member, *, reason='no reason specified'):
-    if ctx.author.name in blackList:
-        await ctx.send('It appears you are blacklisted.')
-    else:
-        mutedRole = discord.utils.get(ctx.guild.roles, name='Muted')
-        await member.add_roles(mutedRole)
-        await ctx.send(f'{member} muted by: {ctx.author.name} for: {reason}')
-        print(f'Muted {member} in {ctx.guild.name}')
-    
-@bot.command(pass_context=True)
-@commands.has_permissions(manage_messages=True)
-async def unmute(ctx, member: discord.Member):
-    if ctx.author.name in blackList:
-        await ctx.send('It appears you are blacklisted.')
-    else:
-        mutedRole = discord.utils.get(ctx.guild.roles, name='Muted')
-        await member.remove_roles(mutedRole)
-        await ctx.send(f'{member} unmuted by {ctx.author.name}')
-        print(f'Unmuted {member} in {ctx.guild.name}')
-
 
 
 @bot.command(pass_context=True)
@@ -221,48 +201,22 @@ async def uptime(ctx):
     days, hours = divmod(hours, 24)
     await ctx.send(f'Uptime: **{days}** days, **{hours}** hours, **{minutes}** minutes, and **{seconds}** seconds.')
 
+
 @bot.command(pass_context=True)
 @commands.has_permissions(manage_nicknames=True)
-async def nick(ctx, user: discord.Member,*, nick):
+async def nick(ctx, user: discord.Member, *, nick):
     await user.edit(nick=nick)
 
-@bot.event
-async def on_member_update(before, after):
-    botschannel = bot.get_channel(740619681680982109)
-    if before.id == 607019207602864198 and after.nick != 'belle delphine':
-        bowieEmbed = discord.Embed(description="Changed bowie's name back to belle delphine <@653719710147411969>", color=0x00ff00)
-        await after.edit(nick="belle delphine")
-        await botschannel.send(embed=bowieEmbed)
-            
+
 @bot.command(pass_context=True)
 @commands.check(is_dev)
 async def showguilds(ctx):
-    message=""
+    message = ""
     for x in bot.guilds:
-        message += f'{x.name} | {len(x.members)} members\n'   
+        message += f'{x.name} | {len(x.members)} members\n'
     embedGuilds = discord.Embed(description=message, title=f'Guilds [{len(bot.guilds)}]')
     await ctx.send(embed=embedGuilds)
-            
-franNames = ['complex', 'fran', 'francisco']
-@bot.event
-async def on_message(message):
-    if message.author.name == bot.user.name:
-        print('ingoring self message')
-    else:
-        channel = message.channel
-        #  Guild specific features
-        if channel.guild.name == 'resonance':
-            pass
-        if channel.guild.name == 'Kero':
-            for x in franNames:
-                if (x in (message.content).lower()):
-                    await channel.send('Fran is a homosexual.')
-        if channel.guild.name == 'Radical Roller Rink':
-            if '!rank' in message.content and channel.name != 'bot-spam':
-                await channel.send('<#741113645487882381>')
-                time.sleep(1)
-                await channel.purge(limit=1)
-        await bot.process_commands(message)
+
 
 def insert_returns(body):
     # insert return stmt if the last expression is a expression statement
@@ -279,9 +233,10 @@ def insert_returns(body):
     if isinstance(body[-1], ast.With):
         insert_returns(body[-1].body)
 
+
 @bot.command(pass_context=True)
 async def userinfo(ctx, *, user: discord.Member):
-    messagetoSend=f'''`Username:` {user.name}
+    messagetoSend = f'''`Username:` {user.name}
 `Discriminator:` {user.discriminator}
 `Nickname:` {user.nick}
 `ID:` {user.id}
@@ -343,5 +298,6 @@ async def debug(ctx, *, cmd):
 
     result = (await eval(f"{fn_name}()", env))
     await ctx.send(result)
+
 
 bot.run(botToken)
