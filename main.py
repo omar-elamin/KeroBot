@@ -19,8 +19,7 @@ guildsN = []
 franNames = ['complex', 'fran', 'francisco']
 
 for line in blacklistFile:
-    blackList.append(line.strip('\n'))
-
+    blackList.append(int(line.strip('\n')))
 
 def is_dev(ctx):
     return ctx.message.author.id in devs
@@ -36,7 +35,7 @@ if __name__ == '__main__':
     for extension in extensions:
         try:
             bot.load_extension(extension)
-            print(f"{extension}" + " loaded successfully")
+            print(f"[Extensions] {extension} loaded successfully")
         except Exception as e:
             print("{} didn't load {}".format(extension, e))
 
@@ -56,7 +55,8 @@ async def on_ready():
         guildsN.append(guild.name)
     print('\nCurrent blacklist:')
     for x in blackList:
-        print(f' - {x}')
+        user = bot.get_user(x)
+        print(f' - {user.name}')
     print('\n')
     global starttime
     starttime = datetime.datetime.utcnow()
@@ -66,7 +66,8 @@ async def on_ready():
 async def on_member_update(before, after):
     botschannel = bot.get_channel(740619681680982109)
     if before.id == 607019207602864198 and after.nick != 'belle delphine':
-        bowieembed = discord.Embed(description="Changed bowie's name back to belle delphine <@653719710147411969>",
+        guild = before.guild
+        bowieembed = discord.Embed(description=f"Changed bowie's name back to belle delphine in {before.guild.name} <@653719710147411969>",
                                    color=0x00ff00)
         await after.edit(nick="belle delphine")
         await botschannel.send(embed=bowieembed)
@@ -91,9 +92,9 @@ async def on_message(message):
                 time.sleep(1)
                 await channel.purge(limit=1)
         await bot.process_commands(message)
-
+    blacklisted = discord.Embed(description='It appears you were blacklisted by a developer.')
     if message.author.id in blackList and message.content.startswith(os.getenv('prefix')):
-        await message.channel.send("It appears you are blacklisted.")
+        await message.channel.send(embed=blacklisted)
         print("[Blacklist] {} tried running command {}".format(message.author, message.content))
         return
     await bot.process_commands(message)
@@ -136,7 +137,7 @@ async def shutdown(ctx):
     print('Updating blacklist')
     updatingFile = open(r'blacklist.txt', 'w+')
     for x in blackList:
-        updatingFile.write(x + '\n')
+        updatingFile.write(str(x) + '\n')
     updatingFile.close()
     await ctx.send(f'{ctx.author.name} has shut down the bot.')
     print(f'{ctx.author.name}: shutting down {bot.user.name} command sent in {ctx.guild.name}')
@@ -152,22 +153,22 @@ async def avatar(ctx, member: discord.Member):
 
 @bot.command(pass_context=True)
 @commands.check(is_dev)
-async def blacklist(ctx, *, name):
-    blackList.append(name)
-    await ctx.send(f'{name} has been blacklisted.')
-    print(f'Added {name} to the blacklist.')
+async def blacklist(ctx, *, user: discord.User):
+    blackList.append(user.id)
+    await ctx.send(f'{user.name} has been blacklisted.')
+    print(f'Added {user.name} to the blacklist.')
 
 
 @bot.command(pass_context=True)
 @commands.check(is_dev)
-async def unblacklist(ctx, *, name):
+async def unblacklist(ctx, *, user: discord.User):
     try:
-        await ctx.send(f'{name} has been unblacklisted.')
-        print(f'Removed {name} from the blacklist.')
-        blackList.remove(name)
+        await ctx.send(f'{user.name} has been unblacklisted.')
+        print(f'Removed {user.name} from the blacklist.')
+        blackList.remove(user.id)
 
     except ValueError:
-        ctx.send(f'{name} is not currently blacklisted.')
+        ctx.send(f'{user.name} is not currently blacklisted.')
 
 
 @bot.command(pass_context=True)
@@ -179,7 +180,8 @@ async def showblacklist(ctx):
         print(f'Showing {ctx.author.name} the blacklist.')
         blackListMessage = ''
         for x in blackList:
-            blackListMessage += f'- {x}\n'
+            user = bot.get_user(x)
+            blackListMessage += f'- {user.name}\n'
         blackListEmbed = discord.Embed(description=blackListMessage, title='Current blacklist')
         await ctx.send(embed=blackListEmbed)
 
@@ -203,7 +205,7 @@ async def uptime(ctx):
     hours, remainder = divmod(int(uptime.total_seconds()), 3600)
     minutes, seconds = divmod(remainder, 60)
     days, hours = divmod(hours, 24)
-    await ctx.send(f'Uptime: **{days}** days, **{hours}** hours, **{minutes}** minutes, and **{seconds}** seconds.')
+    await ctx.send(f'Uptime: `{days} days` `{hours} hours` `{minutes} minutes` and `{seconds} seconds.`')
 
 
 @bot.command(pass_context=True)
@@ -247,7 +249,7 @@ async def userinfo(ctx, *, user: discord.Member):
 `On a Phone?` {user.is_on_mobile()}'''
     await ctx.send(messagetoSend)
 
-
+# eval command stolen code
 @bot.command(name='eval')
 @commands.check(is_dev)
 async def debug(ctx, *, cmd):
