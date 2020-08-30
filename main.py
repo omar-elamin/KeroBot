@@ -51,11 +51,10 @@ async def on_ready():
     for guild in bot.guilds:
         print(f'[Guilds] Connected to guild: {guild.name}, Owner: {guild.owner}')
         guildsN.append(guild.name)
-    print('\n[Blacklist] Current blacklist:')
+    print('[Blacklist] Current blacklist:')
     for x in blackList:
         user = bot.get_user(x)
         print(f'[Blacklist] - {user.name}')
-    print('\n')
     global starttime
     starttime = datetime.datetime.utcnow()
 
