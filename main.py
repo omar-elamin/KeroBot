@@ -95,16 +95,16 @@ async def on_message(message):
         await message.channel.send(embed=blacklisted)
         print("[Blacklist] {} tried running command {}".format(message.author, message.content))
         return
-    if message.content.startswith(os.getenv('prefix')):
-        print(f'[Commands] {message.author} ran: {message.content} in guild: {message.guild.name}')
-        return
     await bot.process_commands(message)
 
+@bot.event
+async def on_command_completion(ctx):
+    print(f'[Commands] {ctx.author} ran: {ctx.content} in guild: {ctx.guild.name}')
 
 @bot.event
 async def on_command_error(ctx, error):
     await ctx.send("Error while running command: `{}`".format(error))
-
+    print(f'[Commands] {ctx.author} failed running: {ctx.content} in guild: {ctx.guild.name}')
 
 textResponses = ['gay']
 
