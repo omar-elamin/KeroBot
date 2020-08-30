@@ -37,26 +37,24 @@ if __name__ == '__main__':
             bot.load_extension(extension)
             print(f"[Extensions] {extension} loaded successfully")
         except Exception as e:
-            print("{} didn't load {}".format(extension, e))
+            print("[Extensions] {} didn't load {}".format(extension, e))
 
 
 @bot.event
 async def on_ready():
-    print(f'{bot.user.name} is online.')
-    print(''''\t
-    ''')
+    print(f'[Client] {bot.user.name} is online.')
     game = discord.Game('with your feelings')
     await bot.change_presence(status=discord.Status.online, activity=game)
 
     guildCount = len(bot.guilds)
-    print(f'Bot currently in {guildCount} guilds.')
+    print(f'[Guilds] Bot currently in {guildCount} guilds.')
     for guild in bot.guilds:
-        print(f'Connected to guild: {guild.name}, Owner: {guild.owner}')
+        print(f'[Guilds] Connected to guild: {guild.name}, Owner: {guild.owner}')
         guildsN.append(guild.name)
-    print('\nCurrent blacklist:')
+    print('\n[Blacklist] Current blacklist:')
     for x in blackList:
         user = bot.get_user(x)
-        print(f' - {user.name}')
+        print(f'[Blacklist] - {user.name}')
     print('\n')
     global starttime
     starttime = datetime.datetime.utcnow()
@@ -97,6 +95,9 @@ async def on_message(message):
         await message.channel.send(embed=blacklisted)
         print("[Blacklist] {} tried running command {}".format(message.author, message.content))
         return
+    if message.content.startswith(os.getenv('prefix')):
+        print(f'[Commands] {message.author} ran: {message.content} in guild: {message.guild.name}')
+        return
     await bot.process_commands(message)
 
 
@@ -110,7 +111,7 @@ textResponses = ['gay']
 
 @bot.command(pass_context=True)
 async def listdevs(ctx):
-    print(f'Showing {ctx.author.name} the Dev list.')
+    print(f'[Event] Showing {ctx.author.name} the Dev list.')
     devlistMessage = ''
     for x in devs:
         dev = bot.get_user(x)
@@ -127,20 +128,20 @@ async def listdevs(ctx):
 async def dm(ctx, user: discord.Member, *, msg):
     if commands.check(is_dev) or user == ctx.author:
         await user.send(msg)
-        print(f'sent DM to {user.name}: {msg}')
+        print(f'[Event] sent DM to {user.name}: {msg}')
 
 
 @bot.command(help='Shuts down the bot', aliases=['kill', 'restart'])
 @commands.check(is_dev)
 async def shutdown(ctx):
     blacklistFile.close()
-    print('Updating blacklist')
+    print('[Blacklist] Updating blacklist')
     updatingFile = open(r'blacklist.txt', 'w+')
     for x in blackList:
         updatingFile.write(str(x) + '\n')
     updatingFile.close()
     await ctx.send(f'{ctx.author.name} has shut down the bot.')
-    print(f'{ctx.author.name}: shutting down {bot.user.name} command sent in {ctx.guild.name}')
+    print(f'[Shutdown] {ctx.author.name}: shutting down {bot.user.name} command sent in {ctx.guild.name}')
     await bot.logout()
 
 
@@ -148,7 +149,7 @@ async def shutdown(ctx):
 async def avatar(ctx, member: discord.Member):
     avatarurl = str(member.avatar_url)
     await ctx.send(f'{avatarurl}')
-    print(f"Gave {member}'s avatar to {ctx.author.name}")
+    print(f"[Event] Gave {member}'s avatar to {ctx.author.name}")
 
 
 @bot.command(pass_context=True)
@@ -156,7 +157,7 @@ async def avatar(ctx, member: discord.Member):
 async def blacklist(ctx, *, user: discord.User):
     blackList.append(user.id)
     await ctx.send(f'{user.name} has been blacklisted.')
-    print(f'Added {user.name} to the blacklist.')
+    print(f'[Event] Added {user.name} to the blacklist.')
 
 
 @bot.command(pass_context=True)
@@ -177,7 +178,7 @@ async def showblacklist(ctx):
     if not blackList:
         await ctx.send('No users currently blacklisted.')
     else:
-        print(f'Showing {ctx.author.name} the blacklist.')
+        print(f'[Event] Showing {ctx.author.name} the blacklist.')
         blackListMessage = ''
         for x in blackList:
             user = bot.get_user(x)
@@ -249,7 +250,7 @@ async def userinfo(ctx, *, user: discord.Member):
 `On a Phone?` {user.is_on_mobile()}'''
     await ctx.send(messagetoSend)
 
-# eval command stolen code
+
 @bot.command(name='eval')
 @commands.check(is_dev)
 async def debug(ctx, *, cmd):
