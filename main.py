@@ -98,12 +98,12 @@ async def on_message(message):
 
 @bot.event
 async def on_command_completion(ctx):
-    print(f'[Commands] {ctx.author} ran: {ctx.content} in guild: {ctx.guild.name}')
+    print(f'[Commands] {ctx.author} ran: {ctx.message.content} in guild: {ctx.guild.name}')
 
 @bot.event
 async def on_command_error(ctx, error):
     await ctx.send("Error while running command: `{}`".format(error))
-    print(f'[Commands] {ctx.author} failed running: {ctx.content} in guild: {ctx.guild.name}')
+    print(f'[Commands] {ctx.author} failed running: {ctx.message.content} in guild: {ctx.guild.name}')
 
 textResponses = ['gay']
 
