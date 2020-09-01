@@ -35,26 +35,26 @@ if __name__ == '__main__':
     for extension in extensions:
         try:
             bot.load_extension(extension)
-            print(f"[{datetime.datetime.utcnow()} INFO]: [Extensions] {extension} loaded successfully")
+            print(f"[{datetime.datetime.utcnow().replace(microsecond=0)} INFO]: [Extensions] {extension} loaded successfully")
         except Exception as e:
             print("[{} INFO]: [Extensions] {} didn't load {}".format(datetime.datetime.utcnow(), extension, e))
 
 
 @bot.event
 async def on_ready():
-    print(f'[{datetime.datetime.utcnow()} INFO]: [Client] {bot.user.name} is online.')
+    print(f'[{datetime.datetime.utcnow().replace(microsecond=0)} INFO]: [Client] {bot.user.name} is online.')
     game = discord.Game('with your feelings')
     await bot.change_presence(status=discord.Status.online, activity=game)
 
     guildCount = len(bot.guilds)
-    print(f'[{datetime.datetime.utcnow()} INFO]: [Guilds] Bot currently in {guildCount} guilds.')
+    print(f'[{datetime.datetime.utcnow().replace(microsecond=0)} INFO]: [Guilds] Bot currently in {guildCount} guilds.')
     for guild in bot.guilds:
-        print(f'[{datetime.datetime.utcnow()} INFO]: [Guilds] Connected to guild: {guild.name}, Owner: {guild.owner}')
+        print(f'[{datetime.datetime.utcnow().replace(microsecond=0)} INFO]: [Guilds] Connected to guild: {guild.name}, Owner: {guild.owner}')
         guildsN.append(guild.name)
-    print('[{datetime.datetime.utcnow()} INFO]: [Blacklist] Current blacklist:')
+    print(f'[{datetime.datetime.utcnow().replace(microsecond=0)} INFO]: [Blacklist] Current blacklist:')
     for x in blackList:
         user = bot.get_user(x)
-        print(f'[{datetime.datetime.utcnow()} INFO]: [Blacklist] - {user.name}')
+        print(f'[{datetime.datetime.utcnow().replace(microsecond=0)} INFO]: [Blacklist] - {user.name}')
     global starttime
     starttime = datetime.datetime.utcnow()
 
@@ -108,25 +108,25 @@ async def on_message(message):
     blacklisted = discord.Embed(description='It appears you were blacklisted by a developer.')
     if message.author.id in blackList and message.content.startswith(os.getenv('prefix')):
         await message.channel.send(embed=blacklisted)
-        print("[{datetime.datetime.utcnow()} INFO]: [Blacklist] {} tried running command {}".format(message.author, message.content))
+        print("[{datetime.datetime.utcnow().replace(microsecond=0)} INFO]: [Blacklist] {} tried running command {}".format(message.author, message.content))
         return
     await bot.process_commands(message)
 
 @bot.event
 async def on_command_completion(ctx):
-    print(f'[{datetime.datetime.utcnow()} INFO]: [Commands] {ctx.author} ran: {ctx.message.content} in guild: {ctx.guild.name}')
+    print(f'[{datetime.datetime.utcnow().replace(microsecond=0)} INFO]: [Commands] {ctx.author} ran: {ctx.message.content} in guild: {ctx.guild.name}')
 
 @bot.event
 async def on_command_error(ctx, error):
     await ctx.send("Error while running command: `{}`".format(error))
-    print(f'[{datetime.datetime.utcnow()} INFO]: [Commands] {ctx.author} failed running: {ctx.message.content} in guild: {ctx.guild.name}')
+    print(f'[{datetime.datetime.utcnow().replace(microsecond=0)} INFO]: [Commands] {ctx.author} failed running: {ctx.message.content} in guild: {ctx.guild.name}')
 
 textResponses = ['gay']
 
 
 @bot.command(pass_context=True)
 async def listdevs(ctx):
-    print(f'[{datetime.datetime.utcnow()} INFO]: [Event] Showing {ctx.author.name} the Dev list.')
+    print(f'[{datetime.datetime.utcnow().replace(microsecond=0)} INFO]: [Event] Showing {ctx.author.name} the Dev list.')
     devlistMessage = ''
     for x in devs:
         dev = bot.get_user(x)
@@ -143,20 +143,20 @@ async def listdevs(ctx):
 async def dm(ctx, user: discord.Member, *, msg):
     if commands.check(is_dev) or user == ctx.author:
         await user.send(msg)
-        print(f'[{datetime.datetime.utcnow()} INFO]: [Event] sent DM to {user.name}: {msg}')
+        print(f'[{datetime.datetime.utcnow().replace(microsecond=0)} INFO]: [Event] sent DM to {user.name}: {msg}')
 
 
 @bot.command(help='Shuts down the bot', aliases=['kill', 'restart'])
 @commands.check(is_dev)
 async def shutdown(ctx):
     blacklistFile.close()
-    print('[{datetime.datetime.utcnow()} INFO]: [Blacklist] Updating blacklist')
+    print('[{datetime.datetime.utcnow().replace(microsecond=0)} INFO]: [Blacklist] Updating blacklist')
     updatingFile = open(r'blacklist.txt', 'w+')
     for x in blackList:
         updatingFile.write(str(x) + '\n')
     updatingFile.close()
     await ctx.send(f'{ctx.author.name} has shut down the bot.')
-    print(f'[{datetime.datetime.utcnow()} INFO]: [Shutdown] {ctx.author.name}: shutting down {bot.user.name} command sent in {ctx.guild.name}')
+    print(f'[{datetime.datetime.utcnow().replace(microsecond=0)} INFO]: [Shutdown] {ctx.author.name}: shutting down {bot.user.name} command sent in {ctx.guild.name}')
     await bot.logout()
 
 
@@ -164,7 +164,7 @@ async def shutdown(ctx):
 async def avatar(ctx, member: discord.Member):
     avatarurl = str(member.avatar_url)
     await ctx.send(f'{avatarurl}')
-    print(f"[{datetime.datetime.utcnow()} INFO]: [Event] Gave {member}'s avatar to {ctx.author.name}")
+    print(f"[{datetime.datetime.utcnow().replace(microsecond=0)} INFO]: [Event] Gave {member}'s avatar to {ctx.author.name}")
 
 
 @bot.command(pass_context=True)
@@ -172,7 +172,7 @@ async def avatar(ctx, member: discord.Member):
 async def blacklist(ctx, *, user: discord.User):
     blackList.append(user.id)
     await ctx.send(f'{user.name} has been blacklisted.')
-    print(f'[{datetime.datetime.utcnow()} INFO]: [Event] Added {user.name} to the blacklist.')
+    print(f'[{datetime.datetime.utcnow().replace(microsecond=0)} INFO]: [Event] Added {user.name} to the blacklist.')
 
 
 @bot.command(pass_context=True)
@@ -180,7 +180,7 @@ async def blacklist(ctx, *, user: discord.User):
 async def unblacklist(ctx, *, user: discord.User):
     try:
         await ctx.send(f'{user.name} has been unblacklisted.')
-        print(f'[{datetime.datetime.utcnow()} INFO]: [Event] Removed {user.name} from the blacklist.')
+        print(f'[{datetime.datetime.utcnow().replace(microsecond=0)} INFO]: [Event] Removed {user.name} from the blacklist.')
         blackList.remove(user.id)
 
     except ValueError:
@@ -193,7 +193,7 @@ async def showblacklist(ctx):
     if not blackList:
         await ctx.send('No users currently blacklisted.')
     else:
-        print(f'[{datetime.datetime.utcnow()} INFO]: [Event] Showing {ctx.author.name} the blacklist.')
+        print(f'[{datetime.datetime.utcnow().replace(microsecond=0)} INFO]: [Event] Showing {ctx.author.name} the blacklist.')
         blackListMessage = ''
         for x in blackList:
             user = bot.get_user(x)
