@@ -25,7 +25,6 @@ class Music(commands.Cog):
         bot = ctx.bot
         vc = ctx.author.voice.channel
         voiceClient = discord.utils.get(bot.voice_clients, guild=ctx.guild)
-        
         if voiceClient and voiceClient.is_connected():
             await voiceClient.disconnect()
             await ctx.send(f'Left `{vc.name}`')
