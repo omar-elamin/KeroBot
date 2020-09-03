@@ -28,7 +28,8 @@ def is_dev(ctx):
 starttime = ''
 
 extensions = [
-    "commands.moderation"
+    "commands.moderation",
+    "commands.music"
 ]
 
 if __name__ == '__main__':
@@ -37,7 +38,7 @@ if __name__ == '__main__':
             bot.load_extension(extension)
             print(f"[{datetime.datetime.utcnow().replace(microsecond=0)} INFO]: [Extensions] {extension} loaded successfully")
         except Exception as e:
-            print("[{} INFO]: [Extensions] {} didn't load {}".format(datetime.datetime.utcnow(), extension, e))
+            print("[{} INFO]: [Extensions] {} didn't load {}".format(datetime.datetime.utcnow().replace(microsecond=0), extension, e))
 
 
 @bot.event
@@ -93,18 +94,19 @@ async def on_message(message):
     else:
         channel = message.channel
         #  Guild specific features
-        if channel.guild.name == 'resonance':
+        if isinstance(message.channel, discord.channel.DMChannel):
             pass
-        if channel.guild.name == 'Kero':
-            for x in franNames:
-                if x in message.content.lower():
-                    await channel.send('Fran is a homosexual.')
-        if channel.guild.name == 'Radical Roller Rink':
-            if '!rank' in message.content and channel.name != 'bot-spam':
-                await channel.send('<#741113645487882381>')
-                time.sleep(1)
-                await channel.purge(limit=1)
-        await bot.process_commands(message)
+        else:
+            if channel.guild.name == 'Kero':
+                for x in franNames:
+                    if x in message.content.lower():
+                        await channel.send('Fran is a homosexual.')
+            if channel.guild.name == 'Radical Roller Rink':
+                if '!rank' in message.content and channel.name != 'bot-spam':
+                    await channel.send('<#741113645487882381>')
+                    time.sleep(1)
+                    await channel.purge(limit=1)
+            await bot.process_commands(message)
     blacklisted = discord.Embed(description='It appears you were blacklisted by a developer.')
     if message.author.id in blackList and message.content.startswith(os.getenv('prefix')):
         await message.channel.send(embed=blacklisted)
@@ -150,7 +152,7 @@ async def dm(ctx, user: discord.Member, *, msg):
 @commands.check(is_dev)
 async def shutdown(ctx):
     blacklistFile.close()
-    print('[{datetime.datetime.utcnow().replace(microsecond=0)} INFO]: [Blacklist] Updating blacklist')
+    print(f'[{datetime.datetime.utcnow().replace(microsecond=0)} INFO]: [Blacklist] Updating blacklist')
     updatingFile = open(r'blacklist.txt', 'w+')
     for x in blackList:
         updatingFile.write(str(x) + '\n')
@@ -269,25 +271,25 @@ async def userinfo(ctx, *, user: discord.Member):
 @bot.command(name='eval')
 @commands.check(is_dev)
 async def debug(ctx, *, cmd):
-    """Evaluates input.
-    Input is interpreted as newline seperated statements.
-    If the last statement is an expression, that is the return value.
-    Usable globals:
-      - `bot`: the bot instance
-      - `discord`: the discord module
-      - `commands`: the discord.ext.commands module
-      - `ctx`: the invokation context
-      - `__import__`: the builtin `__import__` function
-    Such that `>eval 1 + 1` gives `2` as the result.
-    The following invokation will cause the bot to send the text '9'
-    to the channel of invokation and return '3' as the result of evaluating
-    >eval ```
-    a = 1 + 2
-    b = a * 2
-    await ctx.send(a + b)
-    a
-    ```
-    """
+    #Evaluates input.
+    #Input is interpreted as newline seperated statements.
+    #If the last statement is an expression, that is the return value.
+    #Usable globals:
+    #  - `bot`: the bot instance
+    #  - `discord`: the discord module
+    #  - `commands`: the discord.ext.commands module
+    #  - `ctx`: the invokation context
+    #  - `__import__`: the builtin `__import__` function
+    #Such that `>eval 1 + 1` gives `2` as the result.
+    #The following invokation will cause the bot to send the text '9'
+    #to the channel of invokation and return '3' as the result of evaluating
+    #>eval ```
+    #a = 1 + 2
+    #b = a * 2
+    #await ctx.send(a + b)
+    #a
+    #```
+    
     fn_name = "_eval_expr"
 
     cmd = cmd.strip("` ")
@@ -313,7 +315,7 @@ async def debug(ctx, *, cmd):
     exec(compile(parsed, filename="<ast>", mode="exec"), env)
 
     result = (await eval(f"{fn_name}()", env))
-    await ctx.send(f'`{result}s`')
+    await ctx.send(f'`{result}`')
 
 
 bot.run(botToken)
