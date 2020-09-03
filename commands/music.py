@@ -27,11 +27,11 @@ class Music(commands.Cog):
         voiceClient = discord.utils.get(bot.voice_clients, guild=ctx.guild)
         
         if voiceClient and voiceClient.is_connected():
-            await vc.disconnect()
+            await voiceClient.disconnect()
             await ctx.send(f'Left `{vc.name}`')
             print(f"[{datetime.datetime.utcnow().replace(microsecond=0)} INFO]: [Music] The bot has disconnected from {vc.name} in {ctx.guild.name}\n")
         else:
-            await ctx.send(f"`ctx.author.name` you fat retard i'm not connected to a vc")
+            await ctx.send(f"`{ctx.author.name}` you fat retard i'm not connected to a vc")
             print(f'[{datetime.datetime.utcnow().replace(microsecond=0)} INFO]: [Music] {ctx.author} failed running: {ctx.message.content} in guild: {ctx.guild.name}')
     
 def setup(bot):
