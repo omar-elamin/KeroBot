@@ -117,12 +117,18 @@ async def on_message(message):
 @bot.event
 async def on_command_completion(ctx):
     print(f'[{datetime.datetime.utcnow().replace(microsecond=0)} INFO]: [Commands] {ctx.author} ran: {ctx.message.content} in guild: {ctx.guild.name}')
-
+    loggingchannel = bot.get_channel(751158338821029919)
+    log = discord.Embed(title='Logging', description=f'{ctx.author} ran: {ctx.message.content} in guild: {ctx.guild.name}', colour=0x7FFF00)
+    await loggingchannel.send(embed=log)
+    
 @bot.event
 async def on_command_error(ctx, error):
     await ctx.send("Error while running command: `{}`".format(error))
     print(f'[{datetime.datetime.utcnow().replace(microsecond=0)} INFO]: [Commands] {ctx.author} failed running: {ctx.message.content} in guild: {ctx.guild.name}')
-
+    loggingchannel = bot.get_channel(751158338821029919)
+    log = discord.Embed(title='Logging', description=f'{ctx.author} failed running: {ctx.message.content} in guild: {ctx.guild.name}', colour=0x7FFF00)
+    await loggingchannel.send(embed=log)
+    
 textResponses = ['gay']
 
 
@@ -316,5 +322,6 @@ async def debug(ctx, *, cmd):
 
     result = (await eval(f"{fn_name}()", env))
     await ctx.send(f'`{result}`')
+
 
 bot.run(botToken)
