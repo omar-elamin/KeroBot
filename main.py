@@ -317,5 +317,4 @@ async def debug(ctx, *, cmd):
     result = (await eval(f"{fn_name}()", env))
     await ctx.send(f'`{result}`')
 
-
 bot.run(botToken)
