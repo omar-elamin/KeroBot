@@ -13,11 +13,11 @@ botToken = os.getenv('botToken')
 
 currentGuild = os.getenv('guildName')
 bot = commands.Bot(command_prefix=os.getenv('prefix'), description='Kero Help Command')
-devs = [114348811995840515, 365274392680333329, 372078453236957185, 147765181903011840]
+devs = [114348811995840515, 365274392680333329, 372078453236957185]
 blacklistFile = open(r"blacklist.txt", "r+")
 blackList = []
 guildsN = []
-franNames = ['complex', 'fran', 'francisco']
+franNames = ['complex', 'fran']
 
 for line in blacklistFile:
     blackList.append(int(line.strip('\n')))
@@ -115,6 +115,12 @@ async def on_message(message):
         await message.channel.send(embed=blacklisted)
         print("[{datetime.datetime.utcnow().replace(microsecond=0)} INFO]: [Blacklist] {} tried running command {}".format(message.author, message.content))
         return
+    if isinstance(message.channel, discord.channel.DMChannel):
+        dmEmbed = discord.Embed()
+        dmEmbed.description = message.content
+        dmEmbed.color = 0xFFAAAA
+        dmEmbed.set_author(icon_url=message.author.avatar_url, name=message.author.name)
+        await bot.get_channel(751885078463774810).send(embed=dmEmbed)
     await bot.process_commands(message)
 
 @bot.event
@@ -223,7 +229,6 @@ async def say(ctx, *, msg):
 @bot.command(pass_context=True)
 async def ping(ctx):
     await ctx.send(f'Latency: {round(bot.latency * 1000, 2)}ms')
-
 
 @bot.command(pass_context=True)
 async def uptime(ctx):
