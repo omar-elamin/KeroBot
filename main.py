@@ -3,6 +3,7 @@ import discord
 import datetime
 import os
 import time
+import random
 
 from discord.ext import commands
 from dotenv import load_dotenv
@@ -106,8 +107,10 @@ async def on_message(message):
                     await channel.send('<#741113645487882381>')
                     time.sleep(1)
                     await channel.purge(limit=1)
-            await bot.process_commands(message)
     blacklisted = discord.Embed(description='It appears you were blacklisted by a developer.')
+    blacklisted.title = 'Hmm'
+    blacklisted.color = 0xFF0000
+    blacklisted.set_footer(text="DM any dev (,listdevs) to be unblacklisted.")
     if message.author.id in blackList and message.content.startswith(os.getenv('prefix')):
         await message.channel.send(embed=blacklisted)
         print("[{datetime.datetime.utcnow().replace(microsecond=0)} INFO]: [Blacklist] {} tried running command {}".format(message.author, message.content))
@@ -118,7 +121,8 @@ async def on_message(message):
 async def on_command_completion(ctx):
     print(f'[{datetime.datetime.utcnow().replace(microsecond=0)} INFO]: [Commands] {ctx.author} ran: {ctx.message.content} in guild: {ctx.guild.name}')
     loggingchannel = bot.get_channel(751158338821029919)
-    log = discord.Embed(title='Logging', description=f'{ctx.author} ran: {ctx.message.content} in guild: {ctx.guild.name}', colour=0x7FFF00)
+    randomcolour = "%06x" % random.randint(0, 0xFFFFFF)
+    log = discord.Embed(title='Logging', description=f'{ctx.author} ran: {ctx.message.content} in guild: {ctx.guild.name}', colour=discord.Colour.from_rgb(random.randint(0,255), random.randint(0,255), random.randint(0,255)))
     await loggingchannel.send(embed=log)
     
 @bot.event
@@ -126,10 +130,9 @@ async def on_command_error(ctx, error):
     await ctx.send("Error while running command: `{}`".format(error))
     print(f'[{datetime.datetime.utcnow().replace(microsecond=0)} INFO]: [Commands] {ctx.author} failed running: {ctx.message.content} in guild: {ctx.guild.name}')
     loggingchannel = bot.get_channel(751158338821029919)
-    log = discord.Embed(title='Logging', description=f'{ctx.author} failed running: {ctx.message.content} in guild: {ctx.guild.name}', colour=0x7FFF00)
+    randomcolour = "%06x" % random.randint(0, 0xFFFFFF)
+    log = discord.Embed(title='Error Logging', description=f'{ctx.author} failed running: {ctx.message.content} in guild: {ctx.guild.name}', colour=discord.Colour.from_rgb(255,0,0))
     await loggingchannel.send(embed=log)
-    
-textResponses = ['gay']
 
 
 @bot.command(pass_context=True)
@@ -321,7 +324,8 @@ async def debug(ctx, *, cmd):
     exec(compile(parsed, filename="<ast>", mode="exec"), env)
 
     result = (await eval(f"{fn_name}()", env))
-    await ctx.send(f'`{result}`')
+    await ctx.send(f'''```py
+{result}```''')
 
 
 bot.run(botToken)
