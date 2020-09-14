@@ -11,7 +11,6 @@ from dotenv import load_dotenv
 load_dotenv()
 botToken = os.getenv('botToken')
 
-currentGuild = os.getenv('guildName')
 bot = commands.Bot(command_prefix=os.getenv('prefix'), description='Kero Help Command')
 devs = [114348811995840515, 365274392680333329, 372078453236957185]
 blacklistFile = open(r"blacklist.txt", "r+")
@@ -37,7 +36,7 @@ if __name__ == '__main__':
     for extension in extensions:
         try:
             bot.load_extension(extension)
-            print(f"[{datetime.datetime.utcnow().replace(microsecond=0)} INFO]: [Extensions] {extension} loaded successfully")
+            print(f"[{datetime.datetime.utcnow().replace(microsecond=0)} INFO]: [Extensions] {extension} loaded successfully");
         except Exception as e:
             print("[{} INFO]: [Extensions] {} didn't load {}".format(datetime.datetime.utcnow().replace(microsecond=0), extension, e))
 
@@ -61,32 +60,31 @@ async def on_ready():
     starttime = datetime.datetime.utcnow()
 
 
-@bot.event
+'''@bot.event
 async def on_member_update(before, after):
     botschannel = bot.get_channel(740619681680982109)
-    if before.id == 607019207602864198 and after.nick != 'belle delphine':
+    if before.id == 607019207602864198 and after.nick != 'bowie':
         guild = before.guild
-        bowieembed = discord.Embed(description=f"Changed bowie's name back to belle delphine in {before.guild.name} <@653719710147411969>",
-                                   color=0x00ff00)
-        await after.edit(nick="belle delphine")
-        await botschannel.send(embed=bowieembed)
+        bowieembed = discord.Embed(description=f"Elmon eats ass.",
+                                   color=0x0101af)
+        await after.edit(nick="bowie")
+        await botschannel.send(embed=bowieembed)'''
 
 
 @bot.command(pass_context=True)
 @commands.has_permissions(kick_members=True)
-async def muteall(ctx, voicechannel):
-    vc = discord.utils.get(ctx.guild.voice_channels, name=voicechannel)
+async def muteall(ctx, *, vc: discord.VoiceChannel):
     for x in vc.members:
         await x.edit(mute=True)
-    await ctx.send(f'`{ctx.author.name}` muted everyone in `{vc.name}`')
-    
+    await ctx.send(embed=discord.Embed(description=f'{ctx.author.name} muted everyone in {vc.name}', colour=0xbc0a1d))
+
+
 @bot.command(pass_context=True)
 @commands.has_permissions(kick_members=True)
-async def unmuteall(ctx, voicechannel):
-    vc = discord.utils.get(ctx.guild.voice_channels, name=voicechannel)
+async def unmuteall(ctx, *, vc: discord.VoiceChannel):
     for x in vc.members:
         await x.edit(mute=False)
-    await ctx.send(f'`{ctx.author.name}` unmuted everyone in `{vc.name}`')
+    await ctx.send(embed=discord.Embed(description=f'{ctx.author.name} unmuted everyone in {vc.name}',colour=0xbc0a1d))
     
 @bot.event
 async def on_message(message):
@@ -118,7 +116,7 @@ async def on_message(message):
     if isinstance(message.channel, discord.channel.DMChannel):
         dmEmbed = discord.Embed()
         dmEmbed.description = message.content
-        dmEmbed.color = 0xFFAAAA
+        dmEmbed.color = 0xbc0a1d
         dmEmbed.set_author(icon_url=message.author.avatar_url, name=message.author.name)
         await bot.get_channel(751885078463774810).send(embed=dmEmbed)
     await bot.process_commands(message)
@@ -133,7 +131,8 @@ async def on_command_completion(ctx):
     
 @bot.event
 async def on_command_error(ctx, error):
-    await ctx.send("Error while running command: `{}`".format(error))
+    await ctx.send('''```py
+{}```'''.format(error))
     print(f'[{datetime.datetime.utcnow().replace(microsecond=0)} INFO]: [Commands] {ctx.author} failed running: {ctx.message.content} in guild: {ctx.guild.name}')
     loggingchannel = bot.get_channel(751158338821029919)
     randomcolour = "%06x" % random.randint(0, 0xFFFFFF)
@@ -148,7 +147,7 @@ async def listdevs(ctx):
     for x in devs:
         dev = bot.get_user(x)
         devlistMessage += f'- {dev}\n'
-    devlistEmbed = discord.Embed(description=devlistMessage, title='Developers:')
+    devlistEmbed = discord.Embed(description=devlistMessage, title='Developers:', color = 0xbc0a1d)
     await ctx.send(embed=devlistEmbed)
 
 
@@ -172,15 +171,17 @@ async def shutdown(ctx):
     for x in blackList:
         updatingFile.write(str(x) + '\n')
     updatingFile.close()
-    await ctx.send(f'{ctx.author.name} has shut down the bot.')
+    await ctx.send(embed=discord.Embed(description=f'{ctx.author.name} has shut down the bot.', colour=0xbc0a1d))
     print(f'[{datetime.datetime.utcnow().replace(microsecond=0)} INFO]: [Shutdown] {ctx.author.name}: shutting down {bot.user.name} command sent in {ctx.guild.name}')
     await bot.logout()
 
 
-@bot.command(help='Get the link to anyones profile photo!')
-async def avatar(ctx, member: discord.Member):
-    avatarurl = str(member.avatar_url)
-    await ctx.send(f'{avatarurl}')
+@bot.command(pass_context=True, help='Get the link to anyones profile photo!')
+async def avatar(ctx, *, member: discord.Member=None):
+    if not member: member=ctx.author
+    avatarembed = discord.Embed(colour=0xbc0a1d)
+    avatarembed.set_image(url=str(member.avatar_url_as(format='png', size=1024)))
+    await ctx.send(embed=avatarembed)
     print(f"[{datetime.datetime.utcnow().replace(microsecond=0)} INFO]: [Event] Gave {member}'s avatar to {ctx.author.name}")
 
 
@@ -188,7 +189,7 @@ async def avatar(ctx, member: discord.Member):
 @commands.check(is_dev)
 async def blacklist(ctx, *, user: discord.User):
     blackList.append(user.id)
-    await ctx.send(f'{user.name} has been blacklisted.')
+    await ctx.send(embed=discord.Embed(description=f'{user.name} has been blacklisted.', colour=0xbc0a1d))
     print(f'[{datetime.datetime.utcnow().replace(microsecond=0)} INFO]: [Event] Added {user.name} to the blacklist.')
 
 
@@ -196,26 +197,26 @@ async def blacklist(ctx, *, user: discord.User):
 @commands.check(is_dev)
 async def unblacklist(ctx, *, user: discord.User):
     try:
-        await ctx.send(f'{user.name} has been unblacklisted.')
+        await ctx.send(embed=discord.Embed(description=f'{user.name} has been unblacklisted.', colour=0xbc0a1d))
         print(f'[{datetime.datetime.utcnow().replace(microsecond=0)} INFO]: [Event] Removed {user.name} from the blacklist.')
         blackList.remove(user.id)
 
     except ValueError:
-        ctx.send(f'{user.name} is not currently blacklisted.')
+        ctx.send(embed=discord.Embed(description=f'{user.name} is not currently blacklisted.', colour=0xbc0a1d))
 
 
 @bot.command(pass_context=True)
 @commands.check(is_dev)
 async def showblacklist(ctx):
     if not blackList:
-        await ctx.send('No users currently blacklisted.')
+        await ctx.send(embed=discord.Embed(description='No users currently blacklisted.', colour=0xbc0a1d))
     else:
         print(f'[{datetime.datetime.utcnow().replace(microsecond=0)} INFO]: [Event] Showing {ctx.author.name} the blacklist.')
         blackListMessage = ''
         for x in blackList:
             user = bot.get_user(x)
             blackListMessage += f'- {user.name}\n'
-        blackListEmbed = discord.Embed(description=blackListMessage, title='Current blacklist')
+        blackListEmbed = discord.Embed(description=blackListMessage, title='Current blacklist', colour = 0xbc0a1d)
         await ctx.send(embed=blackListEmbed)
 
 
@@ -228,7 +229,7 @@ async def say(ctx, *, msg):
 
 @bot.command(pass_context=True)
 async def ping(ctx):
-    await ctx.send(f'Latency: {round(bot.latency * 1000, 2)}ms')
+    await ctx.send(embed=discord.Embed(description=f'Latency: {round(bot.latency * 1000, 2)}ms', colour=0xbc0a1d))
 
 @bot.command(pass_context=True)
 async def uptime(ctx):
@@ -237,7 +238,7 @@ async def uptime(ctx):
     hours, remainder = divmod(int(uptime.total_seconds()), 3600)
     minutes, seconds = divmod(remainder, 60)
     days, hours = divmod(hours, 24)
-    await ctx.send(f'Uptime: `{days} days` `{hours} hours` `{minutes} minutes` and `{seconds} seconds.`')
+    await ctx.send(embed=discord.Embed(description=f'Uptime: `{days} days` `{hours} hours` `{minutes} minutes` and `{seconds} seconds.`', colour=0xbc0a1d))
 
 
 @bot.command(pass_context=True)
@@ -246,7 +247,7 @@ async def showguilds(ctx):
     message = ""
     for x in bot.guilds:
         message += f'{x.name} | {len(x.members)} members\n'
-    embedGuilds = discord.Embed(description=message, title=f'Guilds [{len(bot.guilds)}]')
+    embedGuilds = discord.Embed(description=message, title=f'Guilds [{len(bot.guilds)}]', colour=0xbc0a1d)
     await ctx.send(embed=embedGuilds)
 
 
@@ -267,19 +268,42 @@ def insert_returns(body):
 
 
 @bot.command(pass_context=True)
-async def userinfo(ctx, *, user: discord.Member):
-    messagetoSend = f'''`Username:` {user.name}
-`Discriminator:` {user.discriminator}
-`Nickname:` {user.nick}
-`ID:` {user.id}
-`Avatar URL:` `{user.avatar_url}`
-`Status:` {user.status}
-`Activity:` {user.activity}
-`Bot?` {user.bot}
-`Account Created On:` {user.created_at}
-`Account Guild Join Date:` {user.joined_at}
-`On a Phone?` {user.is_on_mobile()}'''
-    await ctx.send(messagetoSend)
+async def userinfo(ctx, *, user: discord.Member=None):
+    if not user: user=ctx.author
+    messagetoSend = discord.Embed(title=f'User Information: {user}', color=0xbc0a1d)
+    messagetoSend.set_thumbnail(url=user.avatar_url)
+    messagetoSend.add_field(name='Username', value = f'{user.name}')
+    messagetoSend.add_field(name='Discriminator', value = f'{user.discriminator}')
+    messagetoSend.add_field(name='Nick', value = f'{user.nick}')
+    messagetoSend.add_field(name='ID', value = f'{user.id}')
+    messagetoSend.add_field(name='Avatar URL', value = f'{user.avatar_url}')
+    messagetoSend.add_field(name='Status', value = f'{user.status}')
+    messagetoSend.add_field(name='Activity', value = f'{user.activity}')
+    messagetoSend.add_field(name='Bot?', value = f'{user.bot}')
+    messagetoSend.add_field(name='Account Creation Date', value = f'{user.created_at}')
+    messagetoSend.add_field(name='Guild Join Date', value = f'{user.joined_at}')
+    messagetoSend.add_field(name='On a Phone?', value = f'{user.is_on_mobile()}')
+    await ctx.send(embed=messagetoSend)
+
+@bot.command(pass_context=True)
+async def serverinfo(ctx):
+    guild = ctx.guild
+    messagetoSend = discord.Embed(title='Server Information', color=0xbc0a1d)
+    messagetoSend.set_thumbnail(url=guild.icon_url_as(format='png'))
+    messagetoSend.add_field(name='Name', value = f'{guild.name}')
+    messagetoSend.add_field(name='ID', value = f'{guild.id}')
+    messagetoSend.add_field(name='Description', value = f'{guild.description}')
+    messagetoSend.add_field(name='Region', value = f'{guild.region}')
+    messagetoSend.add_field(name='Owner', value = f'{guild.owner}')
+    messagetoSend.add_field(name='Members', value = f'{guild.member_count}')
+    messagetoSend.add_field(name='Guild Creation Date', value = f'{guild.created_at}')
+    messagetoSend.add_field(name='Role Count', value = f'{len(guild.roles)}')
+    messagetoSend.add_field(name=f'Channel Count ({len(guild.channels)} Total)', value = f'{len(guild.voice_channels)} voice, {len(guild.text_channels)} text')
+    messagetoSend.add_field(name='Boost Level', value = f'{guild.premium_tier}')
+    messagetoSend.add_field(name='AFK Timeout', value = f'{guild.afk_timeout/60} minutes')
+    messagetoSend.add_field(name='AFK Channel', value = f'{guild.afk_channel}')
+    await ctx.send(embed=messagetoSend)
+
 
 
 @bot.command(name='eval')
@@ -329,8 +353,8 @@ async def debug(ctx, *, cmd):
     exec(compile(parsed, filename="<ast>", mode="exec"), env)
 
     result = (await eval(f"{fn_name}()", env))
-    await ctx.send(f'''```py
-{result}```''')
+    if result is not None:
+        await ctx.send(embed=discord.Embed(description=f'{result}', colour=0xbc0a1d))
 
 
 bot.run(botToken)
