@@ -150,11 +150,6 @@ async def listdevs(ctx):
     devlistEmbed = discord.Embed(description=devlistMessage, title='Developers:', color = 0xbc0a1d)
     await ctx.send(embed=devlistEmbed)
 
-
-# @bot.command()
-# async def francisco(msg):
-#    await msg.send(textResponses[0])
-
 @bot.command(pass_context=True)
 async def dm(ctx, user: discord.Member, *, msg):
     if commands.check(is_dev) or user == ctx.author:
