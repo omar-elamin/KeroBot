@@ -150,6 +150,11 @@ async def listdevs(ctx):
     devlistEmbed = discord.Embed(description=devlistMessage, title='Developers:', color = 0xbc0a1d)
     await ctx.send(embed=devlistEmbed)
 
+
+# @bot.command()
+# async def francisco(msg):
+#    await msg.send(textResponses[0])
+
 @bot.command(pass_context=True)
 async def dm(ctx, user: discord.Member, *, msg):
     if commands.check(is_dev) or user == ctx.author:
@@ -348,7 +353,7 @@ async def debug(ctx, *, cmd):
     exec(compile(parsed, filename="<ast>", mode="exec"), env)
 
     result = (await eval(f"{fn_name}()", env))
-    if result is not None:
+    if result is not None and ('ctx.send' not in cmd):
         await ctx.send(embed=discord.Embed(description=f'{result}', colour=0xbc0a1d))
 
 
