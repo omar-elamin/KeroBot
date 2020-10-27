@@ -4,6 +4,7 @@ import datetime
 import os
 import time
 import random
+import aiofiles
 
 from discord.ext import commands
 from dotenv import load_dotenv
@@ -15,7 +16,6 @@ bot = commands.Bot(command_prefix=os.getenv('prefix'), description='Kero Help Co
 devs = [114348811995840515, 365274392680333329, 372078453236957185]
 blacklistFile = open(r"blacklist.txt", "r+")
 blackList = []
-guildsN = []
 franNames = ['complex', 'fran']
 
 for line in blacklistFile:
@@ -51,14 +51,51 @@ async def on_ready():
     print(f'[{datetime.datetime.utcnow().replace(microsecond=0)} INFO]: [Guilds] Bot currently in {guildCount} guilds.')
     for guild in bot.guilds:
         print(f'[{datetime.datetime.utcnow().replace(microsecond=0)} INFO]: [Guilds] Connected to guild: {guild.name}, Owner: {guild.owner}')
-        guildsN.append(guild.name)
     print(f'[{datetime.datetime.utcnow().replace(microsecond=0)} INFO]: [Blacklist] Current blacklist:')
     for x in blackList:
         user = bot.get_user(x)
         print(f'[{datetime.datetime.utcnow().replace(microsecond=0)} INFO]: [Blacklist] - {user.name}')
     global starttime
     starttime = datetime.datetime.utcnow()
+    
+    bot.reaction_roles = []
+    for file in ['reactionroles.txt']:
+        async with aiofiles.open(file, mode='a') as temp:
+            pass
+    async with aiofiles.open('reactionroles.txt', mode='r') as file:
+        lines = await file.readlines()
+        for line in lines:
+            data = line.split(' ')
+            bot.reaction_roles.append((int(data[0]), int(data[1]), data[2].strip('\n')))
 
+@bot.event
+async def on_raw_reaction_add(payload):
+    if payload.member == bot.user:
+        pass
+    else:
+        for role_id, msg_id, emoji in bot.reaction_roles:
+            if msg_id == payload.message_id and emoji == str(payload.emoji.name.encode('utf-8')):
+                await payload.member.add_roles(bot.get_guild(payload.guild_id).get_role(role_id), reason='reaction')
+
+@bot.event
+async def on_raw_reaction_remove(payload):
+    if payload.member == bot.user:
+        pass
+    else:
+        for role_id, msg_id, emoji in bot.reaction_roles:
+            if msg_id == payload.message_id and emoji == str(payload.emoji.name.encode('utf-8')):
+                await bot.get_guild(payload.guild_id).get_member(payload.user_id).remove_roles(bot.get_guild(payload.guild_id).get_role(role_id), reason='reaction')
+
+@bot.command()
+@commands.has_permissions(manage_roles=True)
+async def setreaction(ctx, role : discord.Role=None, msg : discord.Message=None, emoji=None):
+    if role and msg and emoji :
+        await msg.add_reaction(emoji)
+        bot.reaction_roles.append((role.id,msg.id,str(emoji.encode('utf-8'))))
+        
+        async with aiofiles.open("reactionroles.txt", mode='a') as file:
+            emoji_utf = emoji.encode('utf-8')
+            await file.write(f'{role.id} {msg.id} {emoji_utf}\n')
 
 '''@bot.event
 async def on_member_update(before, after):
@@ -71,7 +108,7 @@ async def on_member_update(before, after):
         await botschannel.send(embed=bowieembed)'''
 
 
-@bot.command(pass_context=True)
+'''@bot.command(pass_context=True)
 @commands.has_permissions(kick_members=True)
 async def muteall(ctx, *, vc: discord.VoiceChannel):
     for x in vc.members:
@@ -85,25 +122,47 @@ async def unmuteall(ctx, *, vc: discord.VoiceChannel):
     for x in vc.members:
         await x.edit(mute=False)
     await ctx.send(embed=discord.Embed(description=f'{ctx.author.name} unmuted everyone in {vc.name}',colour=0xbc0a1d))
-    
+
+@bot.command(pass_context=True)
+@commands.has_permissions(kick_members=True)
+async def deafenall(ctx, *, vc: discord.VoiceChannel):
+    for x in vc.members:
+        await x.edit(deafen=True)
+    await ctx.send(embed=discord.Embed(description=f'{ctx.author.name} muted everyone in {vc.name}', colour=0xbc0a1d))
+
+@bot.command(pass_context=True)
+@commands.has_permissions(kick_members=True)
+async def undeafenall(ctx, *, vc: discord.VoiceChannel):
+    for x in vc.members:
+        await x.edit(deafen=False)
+    await ctx.send(embed=discord.Embed(description=f'{ctx.author.name} unmuted everyone in {vc.name}',colour=0xbc0a1d))'''
+
 @bot.event
 async def on_message(message):
     if message.author.name == bot.user.name:
         return
     else:
         channel = message.channel
+        if '<@723524131970351194>' in message.content or '<@!723524131970351194>' in message.content:
+            keroInfo = discord.Embed(title='Kero Bot', description='`Prefix=,` (run ,help for help)', color=0xbc0a1d)
+            keroInfo.add_field(name='Owner', value='`elmon#0001`')
+            keroInfo.add_field(name='Developers', value='`elmon#0001`, `speed#3413`')
+            await channel.send(embed=keroInfo)
+
         #  Guild specific features
         if isinstance(message.channel, discord.channel.DMChannel):
             pass
         else:
-            if channel.guild.name == 'Kero':
+            if channel.guild.name == 'The Circus':
                 for x in franNames:
                     if x in message.content.lower():
                         await channel.send('Fran is a homosexual.')
+                if 'xd' in message.content.lower():
+                    await message.delete()
             if channel.guild.name == 'Radical Roller Rink':
                 if '!rank' in message.content and channel.name != 'bot-spam':
-                    await channel.send('<#741113645487882381>')
-                    time.sleep(1)
+                    await channel.send(f'{message.author.mention} <#741113645487882381>')
+                    time.sleep(1.5)
                     await channel.purge(limit=1)
     blacklisted = discord.Embed(description='It appears you were blacklisted by a developer.')
     blacklisted.title = 'Hmm'
