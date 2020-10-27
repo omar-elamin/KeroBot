@@ -86,6 +86,38 @@ class Moderation(commands.Cog):
         await user.edit(nick=nick)
         await ctx.send(embed=discord.Embed(description=f'Changed {user}\'s nickname to {nick}',colour=0xbc0a1d))
 
-
+    @commands.command()
+    @commands.has_permissions(kick_members=True)
+    async def muteall(self, ctx, *, vc: discord.VoiceChannel):
+        for x in vc.members:
+            await x.edit(mute=True)
+        await ctx.send(embed=discord.Embed(description=f'{ctx.author.name} muted everyone in {vc.name}', colour=0xbc0a1d))
+    
+    
+    @commands.command()
+    @commands.has_permissions(kick_members=True)
+    async def unmuteall(self, ctx, *, vc: discord.VoiceChannel):
+        for x in vc.members:
+            await x.edit(mute=False)
+        await ctx.send(embed=discord.Embed(description=f'{ctx.author.name} unmuted everyone in {vc.name}',colour=0xbc0a1d))
+    
+    @commands.command(aliases=['deafenall','disablevc'])
+    @commands.has_permissions(kick_members=True)
+    async def vcoff(self, ctx, *, vc: discord.VoiceChannel):
+        'Mutes and deafens everyone in a voice channel.'
+        for x in vc.members:
+            await x.edit(deafen=True)
+            await x.edit(mute=True)
+        await ctx.send(embed=discord.Embed(description=f'{ctx.author.name} disabled {vc.name}', colour=0xbc0a1d))
+    
+    @commands.command(aliases=['undeafenall','enablevc'])
+    @commands.has_permissions(kick_members=True)
+    async def vcon(self, ctx, *, vc: discord.VoiceChannel):
+        'Unmutes and undeafens everyone in a voice channel.' 
+        for x in vc.members:
+            await x.edit(deafen=False)
+            await x.edit(mute=False)
+        await ctx.send(embed=discord.Embed(description=f'{ctx.author.name} enabled {vc.name}',colour=0xbc0a1d))
+    
 def setup(bot):
     bot.add_cog(Moderation(bot))
