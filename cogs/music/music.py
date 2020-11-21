@@ -14,7 +14,7 @@ class Music(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.bot.music = lavalink.Client(723524131970351194)
-        self.bot.music.add_node('localhost', 8888, "LaVaLinKNoTWorKiNG", 'eu', 'music_node')
+        self.bot.music.add_node('localhost', 8888, [CENSORED], 'eu', 'music_node')
         self.bot.add_listener(self.bot.music.voice_update_handler, 'on_socket_response')
         self.bot.music.add_event_hook(self.track_hook)
         
@@ -226,7 +226,7 @@ class Music(commands.Cog):
         await ctx.send(embed=em)
 
     @checks.is_dj()
-    @commands.command(aliases=['normalize'])
+    @commands.command()
     async def earrape(self, ctx): 
         player = self.bot.music.player_manager.get(ctx.guild.id) 
         await player.set_volume(1000)
