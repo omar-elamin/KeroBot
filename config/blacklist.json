@@ -1,3 +1,5 @@
 {
-    "blacklist": []
+    "blacklist": [
+        [EXAMPLE_ID]
+    ]
 }
