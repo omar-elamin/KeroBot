@@ -3,6 +3,8 @@ import datetime
 
 from utils import checks
 from discord.ext import commands
+from utils import functions
+from cogs import events
 
 class Misc(commands.Cog):
     def __init__(self, bot):
@@ -20,12 +22,45 @@ class Misc(commands.Cog):
     
     @commands.command(pass_context=True)
     async def dm(self, ctx, user: discord.Member, *, msg):
-        if checks.is_dev() or user == ctx.author:
+        'Send a DM Anonymously (OPT-OUT USING ,nodm)'
+        if user.id not in checks.nodm_ids:
             em = discord.Embed(title='Anonymous message', description=msg)
             await user.send(embed=em)
             print(f'[{datetime.datetime.utcnow().replace(microsecond=0)} INFO]: [Event] {ctx.author} sent anonymous DM to {user.name}: {msg}')
+        else:
+            em = discord.Embed(title='Not sent.', description='That user has opted out of Anonymous DMs.')
+            await ctx.send(embed=em)
+            
+    @commands.command()
+    async def invite(self, ctx):
+        "Get the invite link to the bot"
+        em = discord.Embed()
+        em.title = 'Bot Invite Link'
+        em.color = 0xbc0a1d
+        invite_url = 'https://discord.com/api/oauth2/authorize?client_id=723524131970351194&permissions=8&scope=bot'
+        em.description = f'[Click To Invite]({invite_url})'
+        await ctx.send(embed=em)
     
-    @commands.command(pass_context=True, help='Get the link to anyones profile photo!')
+    @commands.command()
+    async def nodm(self, ctx):
+        'Opt-out of recieving anonymous DMs from the bot.'
+        user = ctx.message.author
+        if user.id not in checks.nodm_ids:
+            checks.nodm_ids.append(user.id)
+            data = functions.read_json('nodm')
+            data['nodm'].append(user.id)
+            functions.write_json('nodm',data)
+            await ctx.send(embed=discord.Embed(title='DMs', description=f'You have opted out of Anonymous DMs.', colour=0xbc0a1d))
+            print(f'[{datetime.datetime.utcnow().replace(microsecond=0)} INFO]: [Event] Added {user.name} to the No-DM list.')
+        else:
+            checks.nodm_ids.remove(user.id)
+            data = functions.read_json('nodm')
+            data['nodm'].remove(user.id)
+            functions.write_json('nodm',data)
+            await ctx.send(embed=discord.Embed(title='DMs', description=f'You have opted in to Anonymous DMs.', colour=0xbc0a1d))
+            print(f'[{datetime.datetime.utcnow().replace(microsecond=0)} INFO]: [Event] Removed {user.name} from the No-DM list.')
+        
+    @commands.command(pass_context=True, help='Get the link to anyones profile photo!', aliases=['av','profile', 'picture'])
     async def avatar(self, ctx, *, member: discord.Member=None):
         if not member: member=ctx.author
         avatarembed = discord.Embed(colour=0xbc0a1d)
@@ -36,9 +71,16 @@ class Misc(commands.Cog):
     @commands.command(pass_context=True)
     async def say(self, ctx, *, msg):
         cmdmsg = ctx.message
-        await cmdmsg.delete()
+        #if '@everyone' in cmdmsg.content or '@here' in cmdmsg.content:
+            #msg.replace('@everyone', '[MENTIONED EVERYONE]')
+        if cmdmsg.role_mentions:
+            index = msg.find('@')
+            msg = msg[:index] + '\\'+ msg[index:]
         await ctx.send(f'{msg}')
-    
+        try:
+            await cmdmsg.delete()
+        except:
+            print(f"[{datetime.datetime.utcnow().replace(microsecond=0)} INFO]: [Say] Failed to delete a message.")
     
     @commands.command(pass_context=True)
     async def ping(self, ctx):
@@ -47,7 +89,7 @@ class Misc(commands.Cog):
     @commands.command(pass_context=True)
     async def uptime(self, ctx):
         command_send_time = datetime.datetime.utcnow()
-        uptime = command_send_time - starttime
+        uptime = command_send_time - events.starttime
         hours, remainder = divmod(int(uptime.total_seconds()), 3600)
         minutes, seconds = divmod(remainder, 60)
         days, hours = divmod(hours, 24)
