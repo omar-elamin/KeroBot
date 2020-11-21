@@ -13,11 +13,10 @@ class Help(commands.Cog):
     async def help(self, ctx, page=1):
         'Displays the help command'
         em = discord.Embed()
-        em.title = 'Help Command'
         command_list = ''        
         cog_list = [c for c in self.bot.cogs.keys()]   
         page_count = math.ceil(len(cog_list) / 4)
-        
+        em.title = f'Help Command (Page {page}/{page_count})'
         page = int(page)
         if page > page_count or page<1:
             await ctx.send(f'Page number \'{page}\' not found.')
@@ -33,14 +32,21 @@ class Help(commands.Cog):
         
         for cog in cogs_needed:
             command_list = ''
-            for command in self.bot.get_cog(cog).walk_commands():
+            for command in self.bot.get_cog(cog).get_commands():
+                showcommand = True
                 if command.hidden:
-                    continue
+                    showcommand = False
                 if command.parent:
-                    continue                
-                command_list += f'**{ctx.prefix}{command.name}** - {command.help}\n'
-            command_list += '\n'            
-            em.add_field(name=cog, value=command_list, inline=False)        
+                    showcommand = False  
+                for check in command.checks:
+                    try:
+                        check(ctx)
+                    except:
+                        showcommand = False
+                if showcommand:
+                    command_list += f'**{ctx.prefix}{command.name}** - {command.help}\n'        
+            if command_list:
+                em.add_field(name=cog, value=command_list, inline=False)        
         em.set_footer(text=f'Requested by {ctx.message.author}', icon_url=functions.get_avatar(ctx.message.author))
         await ctx.send(embed=em)
 
