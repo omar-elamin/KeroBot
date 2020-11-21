@@ -23,7 +23,10 @@ class Events(commands.Cog):
         print(f'[{datetime.datetime.utcnow().replace(microsecond=0)} INFO]: [Guilds] Bot currently in {guildCount} guilds.')
         for guild in self.bot.guilds:
             print(f'[{datetime.datetime.utcnow().replace(microsecond=0)} INFO]: [Guilds] Connected to guild: {guild.name}, Owner: {guild.owner}')
-            
+        
+        nodm_data = functions.read_json('nodm')
+        checks.nodm_ids = nodm_data['nodm']
+        
         blacklist_data = functions.read_json('blacklist')
         checks.blacklisted_users = blacklist_data['blacklist']
         print(f'[{datetime.datetime.utcnow().replace(microsecond=0)} INFO]: [Blacklist] Current blacklist:')
@@ -33,14 +36,17 @@ class Events(commands.Cog):
         global starttime
         starttime = datetime.datetime.utcnow()
         
-        for file in ['reactionroles.txt']:
+        reaction_data = functions.read_json('reactionroles')
+        self.bot.reaction_roles = reaction_data['reaction_roles']
+        
+        '''for file in ['reactionroles.txt']:
             async with aiofiles.open(file, mode='a') as temp:
                 pass
         async with aiofiles.open('reactionroles.txt', mode='r') as file:
             lines = await file.readlines()
             for line in lines:
                 data = line.split(' ')
-                self.bot.reaction_roles.append((int(data[0]), int(data[1]), data[2].strip('\n')))
+                self.bot.reaction_roles.append((int(data[0]), int(data[1]), data[2].strip('\n')))'''
     
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
@@ -48,7 +54,7 @@ class Events(commands.Cog):
             pass
         else:
             for role_id, msg_id, emoji in self.bot.reaction_roles:
-                if msg_id == payload.message_id and emoji == str(payload.emoji.name.encode('utf-8')):
+                if msg_id == payload.message_id and emoji == str(payload.emoji.name):
                     await payload.member.add_roles(self.bot.get_guild(payload.guild_id).get_role(role_id), reason='reaction')
     
     @commands.Cog.listener()
@@ -57,7 +63,7 @@ class Events(commands.Cog):
             pass
         else:
             for role_id, msg_id, emoji in self.bot.reaction_roles:
-                if msg_id == payload.message_id and emoji == str(payload.emoji.name.encode('utf-8')):
+                if msg_id == payload.message_id and emoji == str(payload.emoji.name):
                     await self.bot.get_guild(payload.guild_id).get_member(payload.user_id).remove_roles(self.bot.get_guild(payload.guild_id).get_role(role_id), reason='reaction')
 
     @commands.Cog.listener()
