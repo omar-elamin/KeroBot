@@ -1,0 +1,9 @@
+{
+    "reaction_roles": [
+        [
+            [EXAMPLE_MESSAGE_ID],
+            [EXAMPLE_ROLE_ID],
+            [EXAMPLE_EMOJI_ENCODING]
+        ]
+    ]
+}
