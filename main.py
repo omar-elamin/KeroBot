@@ -12,7 +12,8 @@ load_dotenv()
 botToken = os.getenv('botToken')
 
 intents = discord.Intents.all()
-bot = commands.Bot(command_prefix=os.getenv('prefix'), description='Kero Help Command', intents=intents)
+allowed_mentions = discord.AllowedMentions(everyone=False)
+bot = commands.Bot(command_prefix=os.getenv('prefix'), description='Kero Help Command', intents=intents, allowed_mentions = allowed_mentions)
 
 extensions = [
     'cogs.commands.help',
@@ -20,14 +21,15 @@ extensions = [
     'cogs.commands.developer',
     'cogs.commands.misc',
     'cogs.music.music',
-    'cogs.events'
+    'cogs.events',
+    'cogs.tf'
 ]
 
 if __name__ == '__main__':
     for extension in extensions:
         try:
             bot.load_extension(extension)
-            print(f"[{datetime.datetime.utcnow().replace(microsecond=0)} INFO]: [Extensions] {extension} loaded successfully");
+            print(f"[{datetime.datetime.utcnow().replace(microsecond=0)} INFO]: [Extensions] {extension} loaded successfully")
         except Exception as e:
             print("[{} INFO]: [Extensions] {} didn't load {}".format(datetime.datetime.utcnow().replace(microsecond=0), extension, e))
 @bot.event
@@ -37,7 +39,7 @@ async def on_message(message):
     else:
         channel = message.channel
         if '<@723524131970351194>' in message.content or '<@!723524131970351194>' in message.content:
-            keroInfo = discord.Embed(title='Kero Bot', description='`Prefix=,` (run ,help for help)', color=0xbc0a1d)
+            keroInfo = discord.Embed(title='Kero Bot', description='`Prefix: ,` (run ,help for help)', color=0xbc0a1d)
             keroInfo.add_field(name='Owner', value='`elmon#0001`')
             keroInfo.add_field(name='Developers', value='`elmon#0001`, `speed#3413`')
             await channel.send(embed=keroInfo)
