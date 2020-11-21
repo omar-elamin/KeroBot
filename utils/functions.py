@@ -2,11 +2,7 @@ import discord
 import json
 import os
 
-from pathlib import Path
 from discord.ext import commands
-
-cwd = Path(__file__).parents[0]
-cwd = str(cwd)
 
 def read_json(file_name):
     with open(f'/root/KeroBot/config/{file_name}.json', 'r') as file:
