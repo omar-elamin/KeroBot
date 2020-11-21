@@ -1,5 +1,6 @@
 {
     "blacklist": [
-        [EXAMPLE_ID]
+        [EXAMPLE_ID_1],
+        [EXAMPLE_ID_2]
     ]
 }
