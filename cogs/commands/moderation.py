@@ -1,7 +1,9 @@
 import discord
+import datetime
 
 from discord.ext import commands
-import datetime
+from utils import functions
+from utils import checks
 
 class Moderation(commands.Cog):
     def __init__(self, bot):
@@ -41,6 +43,7 @@ class Moderation(commands.Cog):
     @commands.command()
     @commands.has_permissions(ban_members=True)
     async def unban(self, ctx, user: discord.User, *, reason=None):
+        'Unbans a user'
         await ctx.guild.unban(user, reason=f'{reason} || by: {ctx.author.name}')
         await ctx.send(embed=discord.Embed(description=f'{user.name} has been unbanned by: {ctx.author.name} for reason: {reason}', colour=0xbc0a1d))
         print(f"[{datetime.datetime.utcnow().replace(microsecond=0)} INFO]: [Moderation] Banned {user.name} from {ctx.guild.name}")
@@ -60,8 +63,8 @@ class Moderation(commands.Cog):
         """Mutes a member of the server."""
         mutedrole = discord.utils.get(ctx.guild.roles, name='Muted')
         if mutedrole is None:
-            mutedrole = discord.utils.get(ctx.guild.roles, name='Muted')
-        else:
+            mutedrole = discord.utils.get(ctx.guild.roles, name='muted')
+        elif mutedrole is None:
             return await ctx.send(embed=discord.Embed(description="Role Muted doesn't exist", colour=0xbc0a1d))
         await member.add_roles(mutedrole, reason = f'{reason} || by {ctx.author.name}')
         if reason == '':
@@ -85,52 +88,60 @@ class Moderation(commands.Cog):
     @commands.command()
     @commands.has_permissions(manage_nicknames=True)
     async def nick(self, ctx, user: discord.Member, *, nick):
+        "Edits a user's nickname"
         await user.edit(nick=nick)
         await ctx.send(embed=discord.Embed(description=f'Changed {user}\'s nickname to {nick}',colour=0xbc0a1d))
 
     @commands.command()
-    @commands.has_permissions(kick_members=True)
+    @checks.is_fran_or_perms()
     async def muteall(self, ctx, *, vc: discord.VoiceChannel):
-        for x in vc.members:
-            await x.edit(mute=True)
+        "Mutes everyone in a voice channel"
+        for vcmember in vc.members:
+            if not vcmember.bot:
+                await vcmember.edit(mute=True)
         await ctx.send(embed=discord.Embed(description=f'{ctx.author.name} muted everyone in {vc.name}', colour=0xbc0a1d))
     
     
     @commands.command()
-    @commands.has_permissions(kick_members=True)
+    @checks.is_fran_or_perms()
     async def unmuteall(self, ctx, *, vc: discord.VoiceChannel):
-        for x in vc.members:
-            await x.edit(mute=False)
+        "Unmutes everyone in a voice channel"
+        for vcmember in vc.members:
+            if not vcmember.bot:
+                await vcmember.edit(mute=False)
         await ctx.send(embed=discord.Embed(description=f'{ctx.author.name} unmuted everyone in {vc.name}',colour=0xbc0a1d))
     
     @commands.command(aliases=['deafenall','disablevc'])
-    @commands.has_permissions(kick_members=True)
+    @checks.is_fran_or_perms()
     async def vcoff(self, ctx, *, vc: discord.VoiceChannel):
         'Mutes and deafens everyone in a voice channel.'
-        for x in vc.members:
-            await x.edit(deafen=True)
-            await x.edit(mute=True)
+        for vcmember in vc.members:
+            if not vcmember.bot:
+                await vcmember.edit(deafen=True)
+                await vcmember.edit(mute=True)
         await ctx.send(embed=discord.Embed(description=f'{ctx.author.name} disabled {vc.name}', colour=0xbc0a1d))
     
     @commands.command(aliases=['undeafenall','enablevc'])
-    @commands.has_permissions(kick_members=True)
+    @checks.is_fran_or_perms()
     async def vcon(self, ctx, *, vc: discord.VoiceChannel):
         'Unmutes and undeafens everyone in a voice channel.' 
         for x in vc.members:
-            await x.edit(deafen=False)
-            await x.edit(mute=False)
+            if not x.bot:
+                await x.edit(deafen=False)
+                await x.edit(mute=False)
         await ctx.send(embed=discord.Embed(description=f'{ctx.author.name} enabled {vc.name}',colour=0xbc0a1d))
     
     @commands.command()
     @commands.has_permissions(manage_roles=True)
     async def setreaction(self, ctx, role : discord.Role=None, msg : discord.Message=None, emoji=None):
-        if role and msg and emoji :
+        "Sets a reaction auto-role."
+        if role and msg and emoji:
+            print(emoji)
             await msg.add_reaction(emoji)
-            self.bot.reaction_roles.append((role.id,msg.id,str(emoji.encode('utf-8'))))
-            
-            async with aiofiles.open("reactionroles.txt", mode='a') as file:
-                emoji_utf = emoji.encode('utf-8')
-                await file.write(f'{role.id} {msg.id} {emoji_utf}\n')
+            self.bot.reaction_roles.append([role.id,msg.id,emoji])
+            data = functions.read_json('reactionroles')
+            data['reaction_roles'].append([role.id,msg.id,emoji])
+            functions.write_json('reactionroles', data)
     
 def setup(bot):
     bot.add_cog(Moderation(bot))
