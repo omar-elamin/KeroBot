@@ -1,4 +1,4 @@
-# KeroBot
+# KeroBot - (OUTDATED)
 Kero Discord Bot
 
 **Information**
